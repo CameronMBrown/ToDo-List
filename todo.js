@@ -75,6 +75,7 @@ function removeDone(bulletText) {
 /* LOADERS */
 
 function showWelcome() {
+  landing.style.width = "50%";
   const dashboard = document.getElementById("dashboard");
   if (dashboard) {
     removeHTML(dashboard);
@@ -96,6 +97,7 @@ function showWelcome() {
 
 function showSignUp() {
   removeHTML(document.getElementById("welcome-container"));
+  landing.style.width = "50%";
 
   //Create required elements
   const container = document.createElement("div");
@@ -203,6 +205,7 @@ function showSignUp() {
 }
 
 function showLogin() {
+  landing.style.width = "50%";
   removeHTML(document.getElementById("welcome-container"));
 
   //create HTML elements
@@ -540,14 +543,15 @@ function showLists(user) {
 
   if (document.querySelector(".icons")) {
     removeHTML(document.querySelector(".icons"));
+  } else if (document.querySelector(".greeting")) {
+    removeHTML(document.querySelector(".greeting"));
   }
-
   if (1 > numLists) {
     //user not yet created any lists
     const welcomeMessage = document.createElement("div");
     welcomeMessage.classList.add("greeting");
     welcomeMessage.innerText = "Click the 'New List' button to get started!";
-    return welcomeMessage;
+    document.querySelector(".dashboard-inner").appendChild(welcomeMessage);
   } else {
     //1 or more saved lists
     const icons = document.createElement("div");
@@ -620,4 +624,3 @@ function showLists(user) {
 }
 
 showWelcome();
-dashboard("cam.brown94@gmail.com", "password");
