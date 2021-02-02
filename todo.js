@@ -4,6 +4,7 @@ var numLists;
 
 /* HELPER FUNCTIONS */
 
+//create and overlay a red error window with the passed text
 function errorMessage(message) {
   const errorLanding = document.createElement("div");
   const container = document.createElement("div");
@@ -19,6 +20,7 @@ function errorMessage(message) {
   document.body.appendChild(errorLanding);
 }
 
+//create a generic close 'x' button
 function closeBtn(window, replaceHTML) {
   //pass in the container div that you wish to close
   //(optionally) pass the function that will be drawn in its place
@@ -36,9 +38,8 @@ function closeBtn(window, replaceHTML) {
   return closeButton;
 }
 
+//removes root element and all child elements from DOM.
 function removeHTML(root) {
-  //removes all root element and all child elements.
-  //useful for clearing dialog windows off screen
   let parent = root.parentNode;
   while (root.lastElementChild) {
     root.removeChild(root.lastElementChild);
@@ -46,8 +47,8 @@ function removeHTML(root) {
   parent.removeChild(root);
 }
 
+//get the number of saved todo lists already created by the user
 function getNumLists() {
-  //get the number of saved todo lists already created by the user
   if (userObj.lists === undefined) {
     return 0;
   } else {
@@ -55,10 +56,7 @@ function getNumLists() {
   }
 }
 
-function getUserObj() {
-  return userObj;
-}
-
+//check if the text data contains '-DONE-'
 function isDone(bulletText) {
   if ("-DONE-" === bulletText.substring(0, 6)) {
     return true;
@@ -67,13 +65,16 @@ function isDone(bulletText) {
   }
 }
 
+//clean up text of a completed task before it is placed in the DOM
+//completed tasks have a leading '-DONE-' flag in the data
 function removeDone(bulletText) {
-  bulletText = bulletText.slice(6);
+  bulletText = bulletText.slice(6); //remove 6 characters = remove '-DONE-'
   return bulletText;
 }
 
 /* LOADERS */
 
+//initial webpage state giving a user the option to signup or login
 function showWelcome() {
   landing.style.width = "50%";
   const dashboard = document.getElementById("dashboard");
@@ -95,6 +96,7 @@ function showWelcome() {
   landing.appendChild(container);
 }
 
+//shows the signup dialog for a new user wishing to create an account
 function showSignUp() {
   removeHTML(document.getElementById("welcome-container"));
   landing.style.width = "50%";
@@ -204,6 +206,7 @@ function showSignUp() {
   landing.appendChild(container);
 }
 
+//shows the login dialog for someone who already has an account
 function showLogin() {
   landing.style.width = "50%";
   removeHTML(document.getElementById("welcome-container"));
@@ -272,6 +275,7 @@ function showLogin() {
   }
 }
 
+//a user-specific homepage showcasing all the user's saved lists
 function dashboard(user, pw) {
   userObj = JSON.parse(localStorage.getItem(user));
 
@@ -335,6 +339,7 @@ function dashboard(user, pw) {
   showLists(userObj.email);
 }
 
+//creates a blank newList interface
 function newList() {
   //create HTML elements
   const list = document.createElement("div");
@@ -382,7 +387,6 @@ function newList() {
     //dashboard needs to be refereshed upon closing a list
     showLists(userObj.email);
   });
-
   newTodoBtn.addEventListener("click", newListItem);
   saveBtn.addEventListener("click", save);
 
@@ -394,10 +398,13 @@ function newList() {
   document.body.append(list);
 
   function save() {
+    //write changes made to a list to localStorage
     let listTitle = title.value;
     let thisList = [];
+
+    //create lists attribute in userObj if this is the first ever saved list
     if (numLists <= 0) {
-      userObj.lists = [thisList];
+      userObj.lists = [thisList]; //userObj.lists is always a 2D array
     }
     thisList.push(listTitle);
 
@@ -423,16 +430,16 @@ function newList() {
     }
 
     if (!match) {
-      //entirely new list
-      userObj.lists.push(thisList);
+      userObj.lists.push(thisList); //entirely new list
     }
 
-    localStorage.setItem(userObj.email, JSON.stringify(userObj));
-    removeHTML(list);
-    showLists(userObj.email);
+    localStorage.setItem(userObj.email, JSON.stringify(userObj)); //commit changes
+    removeHTML(list); //close list window upon save
+    showLists(userObj.email); //refresh dashboard
   }
 }
 
+//creates an empty row in the newList interface
 function newListItem() {
   //create HTML elements
   const container = document.createElement("div");
@@ -477,22 +484,25 @@ function newListItem() {
   document.querySelector(".bullets-container").appendChild(container);
 }
 
+//change the contents of an already saved list
 function editList(index) {
-  newList();
-  const listData = userObj.lists[index];
+  newList(); //start by creating a blank new list window on screen
+  const listData = userObj.lists[index]; //title and bullets in list to be edited
+  //create html elements
   const btnsContainer = document.querySelector(".list-inner-btns");
   const delBtn = document.createElement("button");
 
   delBtn.classList.add("ui-btn-dark");
   delBtn.innerText = "Delete";
-
   delBtn.addEventListener("click", () => {
-    errorMessage("Are you sure you want to delete " + listData[0]);
+    //used to check if the user wants to permanently delete entire list
+    errorMessage("Are you sure you want to permanently delete " + listData[0]);
+    //create html elements
     const errorContainer = document.querySelector(".error");
-
     const yesBtn = document.createElement("button");
     const noBtn = document.createElement("button");
 
+    //style buttons
     yesBtn.classList.add("ui-btn");
     yesBtn.innerText = "Yes";
     yesBtn.style.margin = "80px 120px 10px 10px";
@@ -502,48 +512,54 @@ function editList(index) {
     yesBtn.addEventListener("click", () => {
       removeHTML(errorContainer);
       removeHTML(document.querySelector(".newlist"));
-      userObj.lists.splice(index, 1);
+      userObj.lists.splice(index, 1); //remove list but keep rest of array
       numLists--;
-      localStorage.setItem(userObj.email, JSON.stringify(userObj));
-      showLists(userObj.email);
+      localStorage.setItem(userObj.email, JSON.stringify(userObj)); //save changes
+      showLists(userObj.email); //refresh dashboard
     });
     noBtn.addEventListener("click", () => {
       removeHTML(errorContainer);
     });
 
+    //add extra buttons to dialog window
     errorContainer.append(yesBtn, noBtn);
   });
-
-  btnsContainer.appendChild(delBtn);
 
   //fill blank newlist div with contents from userObj for corrisponding list
   document.querySelector(".list-title").value = listData[0]; //title
 
+  //use newListItem to create blank rows to be filled with data
   for (let i = 1; i < listData.length; i++) newListItem();
 
+  //fill list with saved data
   let bullets = document.querySelectorAll(".bullet");
   let i = 1;
-  for (let bul of bullets) {
+  for (let bullet of bullets) {
     if (isDone(listData[i])) {
-      bul.childNodes[1].value = removeDone(listData[i]);
-      bul.childNodes[0].checked = true;
+      //task is saved as done
+      bullet.childNodes[1].value = removeDone(listData[i]);
+      bullet.childNodes[0].checked = true; //checkbox
     } else {
-      bul.childNodes[1].value = listData[i];
+      bullet.childNodes[1].value = listData[i]; //not done, just copy text data
     }
     i++;
   }
+  btnsContainer.appendChild(delBtn);
 }
 
+//creates smaller icon lists for inside the dashboard
 function showLists(user) {
   //update global variables
   userObj = JSON.parse(localStorage.getItem(user));
   numLists = getNumLists(userObj);
 
+  //if being called upon refresh, we need to clear lists shown
   if (document.querySelector(".icons")) {
     removeHTML(document.querySelector(".icons"));
   } else if (document.querySelector(".greeting")) {
     removeHTML(document.querySelector(".greeting"));
   }
+
   if (1 > numLists) {
     //user not yet created any lists
     const welcomeMessage = document.createElement("div");
@@ -565,40 +581,8 @@ function showLists(user) {
 
       let listItems = userObj.lists[i].slice(1); //slice off the first element (the title)
 
-      for (let j = 0; j < listItems.length; j++) {
-        //construct a single bullet item for the icon
-        const bullet = document.createElement("li");
-        const checkbox = document.createElement("input");
-        const bulletText = document.createElement("div");
-
-        bullet.classList.add("icon-list-item");
-        checkbox.setAttribute("type", "checkbox");
-        bulletText.classList.add("icon-text-item");
-
-        //fill checkboxes if the task is marked done
-        if (isDone(userObj.lists[i][j + 1])) {
-          checkbox.checked = true;
-          bulletText.innerText = removeDone(listItems[j]);
-        } else {
-          bulletText.innerText = listItems[j];
-        }
-
-        checkbox.addEventListener("click", () => {
-          if (checkbox.checked) {
-            userObj.lists[i][j + 1] = "-DONE-" + userObj.lists[i][j + 1];
-          } else {
-            userObj.lists[i][j + 1] = removeDone(userObj.lists[i][j + 1]);
-          }
-          localStorage.setItem(userObj.email, JSON.stringify(userObj)); //save changes to localStorage
-        });
-
-        bullet.append(checkbox, bulletText);
-        iconContents.appendChild(bullet);
-      }
-
       //add classes and attributes
       icon.classList.add("icon-container");
-      //icon.setAttribute("data", JSON.stringify(userObj.lists[i]));
       icon.setAttribute("index", i);
       iconHeadder.classList.add("icon-headder");
       iconTitle.classList.add("icon-title");
@@ -612,11 +596,46 @@ function showLists(user) {
         editList(i);
       });
 
+      //create bullets in icon
+      for (let j = 0; j < listItems.length; j++) {
+        const bullet = document.createElement("li");
+        const checkbox = document.createElement("input");
+        const bulletText = document.createElement("div");
+
+        bullet.classList.add("icon-list-item");
+        checkbox.setAttribute("type", "checkbox");
+        bulletText.classList.add("icon-text-item");
+
+        //fill checkboxes if the task is marked done
+        if (isDone(userObj.lists[i][j + 1])) {
+          checkbox.checked = true;
+          bulletText.innerText = removeDone(listItems[j]);
+        } else {
+          bulletText.innerText = listItems[j]; //not done, just copy text data
+        }
+
+        //task can be marked done from icon, without opening editList
+        checkbox.addEventListener("click", () => {
+          if (checkbox.checked) {
+            userObj.lists[i][j + 1] = "-DONE-" + userObj.lists[i][j + 1];
+          } else {
+            userObj.lists[i][j + 1] = removeDone(userObj.lists[i][j + 1]);
+          }
+          localStorage.setItem(userObj.email, JSON.stringify(userObj)); //save changes to localStorage
+        });
+
+        //add bullet
+        bullet.append(checkbox, bulletText);
+        iconContents.appendChild(bullet);
+      }
+
+      //build icon
       iconHeadder.append(iconTitle, editImg);
       icon.append(iconHeadder, iconContents);
       icons.appendChild(icon);
     }
 
+    //add icons to dashboard
     document.querySelector(".dashboard-inner").appendChild(icons);
   }
 }
