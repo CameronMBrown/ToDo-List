@@ -417,14 +417,12 @@ function newList() {
     for (let i = 0; i < numLists; i++) {
       if (thisList[0] === userObj.lists[i][0]) {
         match = true;
+        userObj.lists[i] = thisList;
         break;
       }
     }
 
-    if (match) {
-      //list already exists, overwrite (do not create new array element)
-      userObj.lists[i] = thisList;
-    } else {
+    if (!match) {
       //entirely new list
       userObj.lists.push(thisList);
     }
