@@ -1,31 +1,27 @@
-const landing = document.getElementById("landing-container");
-var userObj;
-var numLists;
-
 /* HELPER FUNCTIONS */
 
 //create and overlay a red error window with the passed text
 function errorMessage(message) {
-  const errorLanding = document.createElement("div");
-  const container = document.createElement("div");
-  const textDiv = document.createElement("div");
+  const errMessage = `<div id="err-container" class="error">
+    <div id="err-inner">
+      <div class="error-text">${message}</div>
+    </div>
+    <div id="err-btns"></div>
+  </div>`;
+  document.body.insertAdjacentHTML("beforeend", errMessage);
 
-  errorLanding.classList.add("error");
-  container.style.position = "relative";
-  textDiv.classList.add("error-text");
-  textDiv.innerText = message;
-
-  container.append(closeBtn(errorLanding), textDiv);
-  errorLanding.append(container);
-  document.body.appendChild(errorLanding);
+  //add close button
+  const err = document.getElementById("err-container");
+  const errInner = document.getElementById("err-inner");
+  errInner.appendChild(closeBtn(err));
 }
 
 //create a generic close 'x' button
 function closeBtn(window, replaceHTML) {
   //pass in the container div that you wish to close
   //(optionally) pass the function that will be drawn in its place
+  //returns Node
   const closeButton = document.createElement("button");
-
   closeButton.innerText = "x";
   closeButton.classList.add("close-button");
   closeButton.addEventListener("click", () => {
@@ -74,66 +70,64 @@ function removeDone(bulletText) {
 
 /* LOADERS */
 
+function pageHeader() {
+  const header = `
+  <div id="titlebox" onclick="window.location.reload()">
+    <img src="img/checkmark.png" alt="checkmark logo" width="80px" height="80px">
+    <h1>To-Do List<h1>
+  </div>
+  <div id="landing-container"></div>`;
+
+  document.body.innerHTML = header;
+}
+
 //initial webpage state giving a user the option to signup or login
 function showWelcome() {
   landing.style.width = "50%";
-  const dashboard = document.getElementById("dashboard");
-  if (dashboard) {
-    removeHTML(dashboard);
-  }
-  const container = document.createElement("div");
-  var signUp = document.createElement("button");
 
-  container.id = "welcome-container";
-  signUp.classList.add("ui-btn");
-  var login = signUp.cloneNode();
-  signUp.innerText = "Sign Up";
-  login.innerText = "Login";
-  signUp.addEventListener("click", showSignUp);
-  login.addEventListener("click", showLogin);
+  const welcome = `<div id="welcome-container">
+    <button class="ui-btn">Sign Up</button>
+    <button class="ui-btn">Login</button>
+  </div>`;
+  landing.innerHTML = welcome;
 
-  container.append(signUp, login);
-  landing.appendChild(container);
+  //event listeners - signup and login buttons
+  document
+    .getElementById("welcome-container")
+    .childNodes[1].addEventListener("click", showSignUp);
+  document
+    .getElementById("welcome-container")
+    .childNodes[3].addEventListener("click", showLogin);
 }
 
 //shows the signup dialog for a new user wishing to create an account
 function showSignUp() {
-  removeHTML(document.getElementById("welcome-container"));
   landing.style.width = "50%";
 
-  //Create required elements
-  const container = document.createElement("div");
-  container.id = "signupform-container";
-  const nameHeader = document.createElement("div");
-  const infoHeader = document.createElement("div");
-  const inner1 = document.createElement("div");
-  const inner2 = document.createElement("div");
-  const input = document.createElement("input");
-  const terms = document.createElement("div");
-  const checkbox = document.createElement("input");
-  const signupButton = document.createElement("button");
-  const footer = document.createElement("div");
+  const signup = `<div id="signupform-container">
+    <div class="form-header">Your Name</div>
+    <div class="signupform-inner">
+      <input type="text" class="login-field" id="fname" placeholder="First Name">
+      <input type="text" class="login-field" id="lname" placeholder="Last Name">
+    </div>
+    <div class="form-header">Login Info</div>
+    <div class="signupform-inner">
+      <input type="text" class="login-field" id="email" placeholder="Email Address">
+      <input type="password" class="login-field" id="pw" placeholder="Password">
+    </div>
+    <div style="position:relative">
+      <button type="submit" class="ui-btn">Sign Up</button>
+      <input type="checkbox" class="checkbox" style="position:absolute; top:12%"></checkbox>
+      <div class="terms">I have read and agree to the terms and conditions</div>
+    </div>
+  </div>`;
+  landing.innerHTML = signup; //build the form
 
-  //grant classes, styles and attributes to elements
-  nameHeader.classList.add("form-header");
-  nameHeader.innerText = "Your Name";
-  infoHeader.classList.add("form-header");
-  infoHeader.innerText = "Login Info";
-  inner1.classList.add("signupform-inner");
-  inner2.classList.add("signupform-inner");
-  input.classList.add("login-field");
-  input.setAttribute("type", "text");
-  checkbox.setAttribute("type", "checkbox");
-  checkbox.classList.add("checkbox");
-  checkbox.style.position = "absolute";
-  checkbox.style.top = "12%";
-  terms.classList.add("terms");
-  terms.innerText = "I have read and agree to the terms and conditions";
+  signUpNode = document.getElementById("signupform-container");
+  signUpNode.childNodes[1].append(closeBtn(signUpNode, showWelcome)); //add a close 'x' button
 
-  signupButton.setAttribute("type", "submit");
-  signupButton.classList.add("ui-btn");
-  signupButton.innerText = "Sign Up";
-  signupButton.addEventListener("click", () => {
+  //event listeners - save new user
+  signUpNode.childNodes[9].childNodes[1].addEventListener("click", () => {
     //create new user obj using localStorage
     let userObj = {};
 
@@ -158,7 +152,7 @@ function showSignUp() {
       //names are only letters
       if (userObj.email != "" && userObj.pw.length >= 8) {
         //email is not blank, password at least 8 char long
-        if (container.querySelector(".checkbox").checked) {
+        if (document.querySelector(".checkbox").checked) {
           //agree to terms
           if (localStorage.getItem(email)) {
             //check for existing user account
@@ -179,76 +173,34 @@ function showSignUp() {
       }
     }
   });
-  footer.style.position = "relative";
-
-  //clone a generic input feild to inherit classes
-  const fname = input.cloneNode(),
-    lname = input.cloneNode(),
-    email = input.cloneNode(),
-    passw = input.cloneNode();
-  //customize text input placeholders
-  fname.setAttribute("placeholder", "First Name");
-  fname.id = "fname";
-  lname.setAttribute("placeholder", "Last Name");
-  lname.id = "lname";
-  email.setAttribute("placeholder", "Email Address");
-  email.id = "email";
-  passw.setAttribute("placeholder", "Password");
-  passw.setAttribute("type", "password");
-  passw.id = "pw";
-
-  //build the form
-  inner1.append(fname, lname);
-  inner2.append(email, passw);
-  nameHeader.appendChild(closeBtn(container, showWelcome));
-  footer.append(signupButton, checkbox, terms);
-  container.append(nameHeader, inner1, infoHeader, inner2, footer);
-  landing.appendChild(container);
 }
 
 //shows the login dialog for someone who already has an account
 function showLogin() {
   landing.style.width = "50%";
-  removeHTML(document.getElementById("welcome-container"));
+  //removeHTML(document.getElementById("welcome-container")); //clear the welcome buttons
 
-  //create HTML elements
-  const container = document.createElement("div");
-  const header = document.createElement("div");
-  const inner = document.createElement("div");
-  const input = document.createElement("input");
-  const signinButton = document.createElement("button");
+  const signin = `
+  <div id="signupform-container">
+    <div class="form-header">Enter your Login Credentials</div>
+    <div class="signupform-inner">
+      <input class="login-field" type="text" placeholder="Email" id="email">
+      <input class="login-field" type="password" placeholder="Password" id="pw">
+    </div>
+    <button id="login" type="submit" class="ui-btn">Login</button>
+  </div>`;
+  landing.innerHTML = signin; //build the form
 
-  //add classes and attributes
-  container.id = "signupform-container";
-  header.classList.add("form-header");
-  header.innerText = "Enter your Login Credentials";
-  inner.classList.add("signupform-inner");
-  input.classList.add("login-field");
-  input.setAttribute("type", "text");
-  const email = input.cloneNode(),
-    passw = input.cloneNode();
-  signinButton.setAttribute("type", "submit");
-  signinButton.classList.add("ui-btn");
-  signinButton.innerText = "Login";
-  email.setAttribute("placeholder", "Email");
-  email.id = "email";
-  passw.setAttribute("placeholder", "Password");
-  passw.setAttribute("type", "password");
-  passw.id = "pw";
+  const container = document.getElementById("signupform-container");
+  container.childNodes[1].appendChild(closeBtn(container, showWelcome));
 
-  //event listeners
-  signinButton.addEventListener("click", login);
-  passw.addEventListener("keypress", function (e) {
+  //event listeners - login
+  document.getElementById("login").addEventListener("click", login);
+  document.getElementById("pw").addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
       login();
     }
   });
-
-  //build the form
-  inner.append(email, passw);
-  header.appendChild(closeBtn(container, showWelcome));
-  container.append(header, inner, signinButton);
-  landing.appendChild(container);
 
   function login() {
     //attempt to validate login credentials
@@ -278,6 +230,7 @@ function showLogin() {
 //a user-specific homepage showcasing all the user's saved lists
 function dashboard(user, pw) {
   userObj = JSON.parse(localStorage.getItem(user));
+  landing.style.width = "70%";
 
   //stop unwanted logins from console
   if (userObj.pw !== pw) {
@@ -286,93 +239,65 @@ function dashboard(user, pw) {
     return;
   }
 
-  //prepare the dashboard landing div
-  let welcome = document.getElementById("welcome-container");
-  let signup = document.getElementById("signupform-container");
-  let dash = document.getElementById("dashboard");
-  if (welcome) {
-    removeHTML(welcome);
-  } else if (signup) {
-    removeHTML(signup);
-  } else if (dash) {
-    removeHTML(dash);
-  }
-  landing.style.width = "70%";
+  const dash = `<div id="dashboard">
+    <div class="dashboard-header">
+      <h1 class="user-name">${userObj.fname} ${userObj.lname}</h1>
+      <button id="logout" class="logout-button">Sign Out</button>
+    </div>
+    <div id="dashboard-inner">
+      <div class="line"></div>
+      <div id="icons"></div>
+    </div>
+    <button id="newlist-btn" class="ui-btn">New List</button>`;
+  landing.innerHTML = dash;
 
-  //create HTML elements
-  const dashboard = document.createElement("div");
-  const header = document.createElement("div");
-  const greeting = document.createElement("h1");
-  const line = document.createElement("div");
-  const logoutBtn = document.createElement("button");
-  const listContainer = document.createElement("div");
-  const newListBtn = document.createElement("button");
-
-  //add styles and attributes
-  dashboard.id = "dashboard";
-  header.classList.add("dashboard-header");
-  greeting.classList.add("user-name");
-  greeting.innerText = userObj.fname + " " + userObj.lname;
-  logoutBtn.classList.add("logout-button");
-  logoutBtn.innerText = "Sign Out";
-  line.classList.add("line");
-  listContainer.classList.add("dashboard-inner");
-  newListBtn.classList.add("ui-btn");
-  newListBtn.innerText = "New List";
-
-  //add event listeners
-  logoutBtn.addEventListener("click", () => {
+  //event listeners
+  document.getElementById("logout").addEventListener("click", () => {
     //prevent signout while dialogs are open
-    if (!document.querySelector(".newlist")) {
+    if (!document.getElementById("newlist")) {
       showWelcome();
     }
   });
-  newListBtn.addEventListener("click", () => {
-    newList(userObj);
+  document.getElementById("newlist-btn").addEventListener("click", () => {
+    //prevent spawning new lists if one is already open
+    if (!document.getElementById("newlist")) {
+      newList(userObj);
+    }
   });
 
-  //build the dashboard
-  header.append(greeting, logoutBtn);
-  listContainer.append(line);
-  dashboard.append(header, listContainer, newListBtn);
-  landing.appendChild(dashboard);
+  //call show lists
   showLists(userObj.email);
 }
 
 //creates a blank newList interface
 function newList() {
-  //create HTML elements
-  const list = document.createElement("div");
-  const inner = document.createElement("div");
-  const header = document.createElement("div");
-  const title = document.createElement("input");
-  const closeButton = closeBtn(list);
-  const line = document.createElement("div");
-  const bullets = document.createElement("div");
-  const btnContainer = document.createElement("div");
-  const newTodoBtn = document.createElement("button");
-  const saveBtn = document.createElement("button");
+  const listUI = `<div id="newlist" class="newlist">
+    <div class="newlist-inner">
+      <div id="list-title" style="position:relative;">
+        <input placeholder="New List..." class="list-title">
+      </div>
+      <div class="line-dark"></div>
+      <div id="bullets" class="bullets-container"></div>
+      <div id="list-inner-btns">
+        <button id="add" class="ui-btn-dark">+</button>
+        <button id="save" class="ui-btn-dark">Save</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML("beforeend", listUI);
 
-  //add styles and attributes
-  list.classList.add("newlist");
-  header.style.position = "relative";
-  inner.classList.add("newlist-inner");
-  title.setAttribute("Placeholder", "New List...");
-  title.classList.add("list-title");
-  line.classList.add("line-dark");
-  bullets.classList.add("bullets-container");
-  btnContainer.classList.add("list-inner-btns");
-  newTodoBtn.classList.add("ui-btn-dark");
-  newTodoBtn.innerText = "+";
-  saveBtn.classList.add("ui-btn-dark");
-  saveBtn.innerText = "Save";
-  saveBtn.style.display = "inline";
-
-  //add event listeners
-  title.addEventListener("keydown", (e) => {
+  const list = document.getElementById("newlist");
+  const header = document.getElementById("list-title");
+  header.appendChild(closeBtn(list));
+  //event listeners
+  header.childNodes[3].addEventListener("click", () => {
+    //dashboard needs to be refereshed upon closing a list
+    showLists(userObj.email);
+  });
+  header.childNodes[1].addEventListener("keydown", (e) => {
+    //user can navigate or create list items with tab key
     if (e.key == "Tab") {
       e.preventDefault();
-      title.blur();
       let nextBullet = document.querySelector(".bullet-item");
       if (nextBullet) {
         nextBullet.focus();
@@ -383,23 +308,12 @@ function newList() {
       }
     }
   });
-  closeButton.addEventListener("click", () => {
-    //dashboard needs to be refereshed upon closing a list
-    showLists(userObj.email);
-  });
-  newTodoBtn.addEventListener("click", newListItem);
-  saveBtn.addEventListener("click", save);
-
-  //build the new list interface
-  header.append(title, closeButton);
-  btnContainer.append(newTodoBtn, saveBtn);
-  inner.append(header, line, bullets, btnContainer);
-  list.appendChild(inner);
-  document.body.append(list);
+  document.getElementById("add").addEventListener("click", newListItem);
+  document.getElementById("save").addEventListener("click", save);
 
   function save() {
     //write changes made to a list to localStorage
-    let listTitle = title.value;
+    let listTitle = header.childNodes[1].value;
     let thisList = [];
 
     //create lists attribute in userObj if this is the first ever saved list
@@ -409,6 +323,7 @@ function newList() {
     thisList.push(listTitle);
 
     //record doneness and name of each task
+    const bullets = document.getElementById("bullets");
     for (let i = 0; i < bullets.childNodes.length; i++) {
       let bullet = bullets.childNodes[i];
       if (bullet.childNodes[0].checked) {
@@ -468,7 +383,7 @@ function newListItem() {
         nextBullet.childNodes[1].focus();
       } else {
         newListItem();
-        let nextBullet = container.nextSibling.childNodes[1];
+        nextBullet = container.nextSibling.childNodes[1];
         nextBullet.focus();
       }
     } else if (e.key == "ArrowUp") {
@@ -482,6 +397,8 @@ function newListItem() {
   //place the bullet in the list
   container.append(checkbox, bulletText, closeBtn(container));
   document.querySelector(".bullets-container").appendChild(container);
+
+  //const container = `<div class="bullet">${}</div>`;
 }
 
 //change the contents of an already saved list
@@ -489,40 +406,35 @@ function editList(index) {
   newList(); //start by creating a blank new list window on screen
   const listData = userObj.lists[index]; //title and bullets in list to be edited
   //create html elements
-  const btnsContainer = document.querySelector(".list-inner-btns");
-  const delBtn = document.createElement("button");
 
-  delBtn.classList.add("ui-btn-dark");
-  delBtn.innerText = "Delete";
-  delBtn.addEventListener("click", () => {
+  const delBtn = `<button class="ui-btn-dark">Delete</button>`;
+  const listBtns = document.getElementById("list-inner-btns");
+  listBtns.insertAdjacentHTML("beforeend", delBtn);
+
+  listBtns.childNodes[5].addEventListener("click", () => {
     //used to check if the user wants to permanently delete entire list
-    errorMessage("Are you sure you want to permanently delete " + listData[0]);
-    //create html elements
-    const errorContainer = document.querySelector(".error");
-    const yesBtn = document.createElement("button");
-    const noBtn = document.createElement("button");
+    errorMessage(
+      `Are you sure you want to permanently delete <strong style="font-size: 16px">${listData[0]}</strong>`
+    );
 
-    //style buttons
-    yesBtn.classList.add("ui-btn");
-    yesBtn.innerText = "Yes";
-    yesBtn.style.margin = "80px 120px 10px 10px";
-    noBtn.classList.add("ui-btn");
-    noBtn.innerText = "No";
+    const errBtns = `<button class="ui-btn">Yes</button><button class="ui-btn">No</button>`;
+    const btnsContainer = document.getElementById("err-btns");
+    btnsContainer.innerHTML = errBtns;
 
-    yesBtn.addEventListener("click", () => {
-      removeHTML(errorContainer);
-      removeHTML(document.querySelector(".newlist"));
+    //event listeners - confirm delete list
+    btnsContainer.childNodes[0].addEventListener("click", () => {
+      //yes button
+      removeHTML(document.getElementById("err-container"));
+      removeHTML(document.getElementById("newlist"));
       userObj.lists.splice(index, 1); //remove list but keep rest of array
       numLists--;
       localStorage.setItem(userObj.email, JSON.stringify(userObj)); //save changes
       showLists(userObj.email); //refresh dashboard
     });
-    noBtn.addEventListener("click", () => {
-      removeHTML(errorContainer);
+    btnsContainer.childNodes[1].addEventListener("click", () => {
+      //no button
+      removeHTML(document.getElementById("err-container"));
     });
-
-    //add extra buttons to dialog window
-    errorContainer.append(yesBtn, noBtn);
   });
 
   //fill blank newlist div with contents from userObj for corrisponding list
@@ -544,7 +456,6 @@ function editList(index) {
     }
     i++;
   }
-  btnsContainer.appendChild(delBtn);
 }
 
 //creates smaller icon lists for inside the dashboard
@@ -554,69 +465,71 @@ function showLists(user) {
   numLists = getNumLists(userObj);
 
   //if being called upon refresh, we need to clear lists shown
-  if (document.querySelector(".icons")) {
-    removeHTML(document.querySelector(".icons"));
+  if (document.getElementById("icons").childNodes) {
+    document.getElementById("icons").innerHTML = "";
   } else if (document.querySelector(".greeting")) {
     removeHTML(document.querySelector(".greeting"));
   }
 
   if (1 > numLists) {
     //user not yet created any lists
-    const welcomeMessage = document.createElement("div");
-    welcomeMessage.classList.add("greeting");
-    welcomeMessage.innerText = "Click the 'New List' button to get started!";
-    document.querySelector(".dashboard-inner").appendChild(welcomeMessage);
+    const welcomeMessage = `<div class="greeting">Click the 'New List' button to get started!</div>`;
+    document
+      .getElementById("dashboard-inner")
+      .insertAdjacentHTML("beforeend", welcomeMessage);
   } else {
     //1 or more saved lists
-    const icons = document.createElement("div");
-    icons.classList.add("icons");
 
     for (let i = 0; i < numLists; i++) {
       //create list icons for dashboard
-      const icon = document.createElement("div");
-      const iconHeadder = document.createElement("div");
-      const iconTitle = document.createElement("div");
-      const editImg = document.createElement("img");
-      const iconContents = document.createElement("ul");
+      const iconHTML = `<div class="icon-container" index="${i}">
+        <div class="icon-header">
+          <div class="icon-title">${userObj.lists[i][0]}</div>
+          <img src="img/edit-icon.png" class="edit-icon">
+        </div>
+        <ul id="list${i}" class="icon-inner"></ul>
+      </div>`;
+      document
+        .getElementById("icons")
+        .insertAdjacentHTML("beforeend", iconHTML);
 
       let listItems = userObj.lists[i].slice(1); //slice off the first element (the title)
 
-      //add classes and attributes
-      icon.classList.add("icon-container");
-      icon.setAttribute("index", i);
-      iconHeadder.classList.add("icon-headder");
-      iconTitle.classList.add("icon-title");
-      editImg.src = "img/edit-icon.png";
-      editImg.classList.add("edit-icon");
-      iconTitle.innerText = userObj.lists[i][0]; //first index should always be list title
-      iconContents.classList.add("icon-inner");
+      const thisIcon = document.querySelector(`[index="${i}"]`);
+      const thisIconHeader = thisIcon.childNodes[1];
 
-      editImg.addEventListener("click", () => {
+      thisIconHeader.childNodes[3].addEventListener("click", () => {
         //clicking a list icon edits the list
         editList(i);
       });
 
       //create bullets in icon
       for (let j = 0; j < listItems.length; j++) {
-        const bullet = document.createElement("li");
-        const checkbox = document.createElement("input");
-        const bulletText = document.createElement("div");
-
-        bullet.classList.add("icon-list-item");
-        checkbox.setAttribute("type", "checkbox");
-        bulletText.classList.add("icon-text-item");
-
         //fill checkboxes if the task is marked done
+        let bulHTML;
         if (isDone(userObj.lists[i][j + 1])) {
-          checkbox.checked = true;
-          bulletText.innerText = removeDone(listItems[j]);
+          bulHTML = `<li class="icon-list-item">
+            <input type="checkbox" position="${j}">
+            <div class="icon-text-item">${removeDone(listItems[j])}</div></li>`;
+          document
+            .getElementById(`list${i}`)
+            .insertAdjacentHTML("beforeend", bulHTML);
+          thisIcon.querySelector(`[position="${j}"]`).checked = true;
         } else {
-          bulletText.innerText = listItems[j]; //not done, just copy text data
+          //not done, just copy text data
+          bulHTML = `<li class="icon-list-item">
+            <input type="checkbox" position="${j}">
+            <div class="icon-text-item">${listItems[j]}</div></li>`;
+          document
+            .getElementById(`list${i}`)
+            .insertAdjacentHTML("beforeend", bulHTML);
         }
 
         //task can be marked done from icon, without opening editList
-        checkbox.addEventListener("click", () => {
-          if (checkbox.checked) {
+        const thisCheckbox = thisIcon.querySelector(`[position="${j}"]`);
+
+        thisCheckbox.addEventListener("click", () => {
+          if (thisCheckbox.checked) {
             userObj.lists[i][j + 1] = "-DONE-" + userObj.lists[i][j + 1];
           } else {
             userObj.lists[i][j + 1] = removeDone(userObj.lists[i][j + 1]);
@@ -625,19 +538,18 @@ function showLists(user) {
         });
 
         //add bullet
-        bullet.append(checkbox, bulletText);
-        iconContents.appendChild(bullet);
+        //document.getElementById(`list${i}`).insertAdjacentHTML(bul);
       }
-
-      //build icon
-      iconHeadder.append(iconTitle, editImg);
-      icon.append(iconHeadder, iconContents);
-      icons.appendChild(icon);
     }
-
-    //add icons to dashboard
-    document.querySelector(".dashboard-inner").appendChild(icons);
   }
 }
 
-showWelcome();
+pageHeader();
+const landing = document.getElementById("landing-container");
+var userObj;
+var numLists;
+//showWelcome();
+dashboard("cam.brown94@gmail.com", "password");
+//dashboard("newuser@todo.ca", "password");  //user with no lists
+
+//TODO disable buttons when error message active
