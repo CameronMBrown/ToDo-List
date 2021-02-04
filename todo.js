@@ -350,9 +350,9 @@ function newList() {
       let bullet = bullets.childNodes[i];
       if (bullet.childNodes[0].checked) {
         //bullet is marked as done
-        thisList.push("-DONE-" + bullet.childNodes[1].value);
+        thisList.push("-DONE-" + bullet.childNodes[2].value);
       } else {
-        thisList.push(bullet.childNodes[1].value);
+        thisList.push(bullet.childNodes[2].value);
       }
     }
 
@@ -397,10 +397,10 @@ function newListItem() {
       e.preventDefault();
       let nextBullet = container.nextSibling;
       if (nextBullet) {
-        nextBullet.childNodes[1].focus();
+        nextBullet.childNodes[2].focus();
       } else {
         newListItem();
-        nextBullet = container.nextSibling.childNodes[1];
+        nextBullet = container.nextSibling.childNodes[2];
         nextBullet.focus();
       }
     } else if (e.key == "ArrowUp") {
@@ -463,7 +463,6 @@ function editList(index) {
   let bullets = document.querySelectorAll(".bullet");
   let i = 1;
   for (let bullet of bullets) {
-    console.log(bullet.childNodes);
     if (isDone(listData[i])) {
       //task is saved as done
       bullet.childNodes[2].value = removeDone(listData[i]);
@@ -484,7 +483,8 @@ function showLists(user) {
   //if being called upon refresh, we need to clear lists shown
   if (document.getElementById("icons").childNodes) {
     document.getElementById("icons").innerHTML = "";
-  } else if (document.querySelector(".greeting")) {
+  }
+  if (document.querySelector(".greeting")) {
     removeHTML(document.querySelector(".greeting"));
   }
 
