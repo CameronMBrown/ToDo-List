@@ -308,20 +308,22 @@ function newList() {
   });
   header.childNodes[1].addEventListener("keydown", (e) => {
     //user can navigate or create list items with tab key
-    if (e.key == "Tab") {
-      e.preventDefault();
-      let nextBullet = document.querySelector(".bullet-item");
-      if (nextBullet) {
-        nextBullet.focus();
-      } else {
-        newListItem();
+    if (!document.getElementById("err-container")) {
+      if (e.key == "Tab") {
+        e.preventDefault();
         let nextBullet = document.querySelector(".bullet-item");
-        nextBullet.focus();
+        if (nextBullet) {
+          nextBullet.focus();
+        } else {
+          newListItem();
+          let nextBullet = document.querySelector(".bullet-item");
+          nextBullet.focus();
+        }
       }
     }
   });
   document.getElementById("add").addEventListener("click", () => {
-    if (!!document.getElementById("err-container")) {
+    if (!document.getElementById("err-container")) {
       newListItem();
     }
   });
