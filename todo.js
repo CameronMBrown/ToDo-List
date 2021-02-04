@@ -559,6 +559,6 @@ const landing = document.getElementById("landing-container");
 var userObj;
 var numLists;
 showWelcome();
-//dashboard("cam.brown94@gmail.com", "password");
 
 //TODO disable some buttons when there are other overlayed windows
+//TODO password encryption
