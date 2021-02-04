@@ -129,47 +129,49 @@ function showSignUp() {
   //event listeners - save new user
   signUpNode.childNodes[9].childNodes[1].addEventListener("click", () => {
     //create new user obj using localStorage
-    let userObj = {};
+    if (!document.getElementById("err-container")) {
+      let userObj = {};
 
-    const validStr = (str) => {
-      //test that string is made up of only letters, no whitespace
-      if (!/^[a-zA-Z]+$/.test(str)) {
-        errorMessage(
-          "Please enter a valid first and last name. Only alphabetic characters are allowed."
-        );
-      } else {
-        return true;
-      }
-    };
-
-    userObj.fname = document.getElementById("fname").value.trim();
-    userObj.lname = document.getElementById("lname").value.trim();
-    userObj.email = document.getElementById("email").value.trim();
-    userObj.pw = document.getElementById("pw").value;
-
-    //first check for valid text user inputs
-    if (validStr(userObj.fname) && validStr(userObj.lname)) {
-      //names are only letters
-      if (userObj.email != "" && userObj.pw.length >= 8) {
-        //email is not blank, password at least 8 char long
-        if (document.querySelector(".checkbox").checked) {
-          //agree to terms
-          if (localStorage.getItem(email)) {
-            //check for existing user account
-            errorMessage(
-              "There is an existing user account with that email. Please use Login page."
-            );
-          }
-          //successfull new user. Store user info & load dashboard
-          localStorage.setItem(userObj.email, JSON.stringify(userObj));
-          dashboard(userObj.email, userObj.pw);
+      const validStr = (str) => {
+        //test that string is made up of only letters, no whitespace
+        if (!/^[a-zA-Z]+$/.test(str)) {
+          errorMessage(
+            "Please enter a valid first and last name. Only alphabetic characters are allowed."
+          );
         } else {
-          errorMessage("Please agree to the terms and conditions");
+          return true;
         }
-      } else {
-        errorMessage(
-          "Please enter a valid email. Your password must be at least 8 characters."
-        );
+      };
+
+      userObj.fname = document.getElementById("fname").value.trim();
+      userObj.lname = document.getElementById("lname").value.trim();
+      userObj.email = document.getElementById("email").value.trim();
+      userObj.pw = document.getElementById("pw").value;
+
+      //first check for valid text user inputs
+      if (validStr(userObj.fname) && validStr(userObj.lname)) {
+        //names are only letters
+        if (userObj.email != "" && userObj.pw.length >= 8) {
+          //email is not blank, password at least 8 char long
+          if (document.querySelector(".checkbox").checked) {
+            //agree to terms
+            if (localStorage.getItem(email)) {
+              //check for existing user account
+              errorMessage(
+                "There is an existing user account with that email. Please use Login page."
+              );
+            }
+            //successfull new user. Store user info & load dashboard
+            localStorage.setItem(userObj.email, JSON.stringify(userObj));
+            dashboard(userObj.email, userObj.pw);
+          } else {
+            errorMessage("Please agree to the terms and conditions");
+          }
+        } else {
+          errorMessage(
+            "Please enter a valid email. Your password must be at least 8 characters."
+          );
+        }
       }
     }
   });
@@ -195,9 +197,13 @@ function showLogin() {
   container.childNodes[1].appendChild(closeBtn(container, showWelcome));
 
   //event listeners - login
-  document.getElementById("login").addEventListener("click", login);
+  document.getElementById("login").addEventListener("click", () => {
+    if (!document.getElementById("err-container")) {
+      login();
+    }
+  });
   document.getElementById("pw").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !document.getElementById("err-container")) {
       login();
     }
   });
@@ -254,13 +260,19 @@ function dashboard(user, pw) {
   //event listeners
   document.getElementById("logout").addEventListener("click", () => {
     //prevent signout while dialogs are open
-    if (!document.getElementById("newlist")) {
+    if (
+      !document.getElementById("newlist") &&
+      !document.getElementById("err-container")
+    ) {
       showWelcome();
     }
   });
   document.getElementById("newlist-btn").addEventListener("click", () => {
     //prevent spawning new lists if one is already open
-    if (!document.getElementById("newlist")) {
+    if (
+      !document.getElementById("newlist") &&
+      !document.getElementById("err-container")
+    ) {
       newList(userObj);
     }
   });
@@ -308,8 +320,16 @@ function newList() {
       }
     }
   });
-  document.getElementById("add").addEventListener("click", newListItem);
-  document.getElementById("save").addEventListener("click", save);
+  document.getElementById("add").addEventListener("click", () => {
+    if (!!document.getElementById("err-container")) {
+      newListItem();
+    }
+  });
+  document.getElementById("save").addEventListener("click", () => {
+    if (!!document.getElementById("err-container")) {
+      save();
+    }
+  });
 
   function save() {
     //write changes made to a list to localStorage
@@ -358,15 +378,10 @@ function newList() {
 function newListItem() {
   //create HTML elements
   const container = document.createElement("div");
-  const checkbox = document.createElement("input");
-  const bulletText = document.createElement("input");
-
-  //add classes and attributes
   container.classList.add("bullet");
-  bulletText.setAttribute("Placeholder", "New Task...");
-  bulletText.classList.add("bullet-item");
-  checkbox.setAttribute("type", "checkbox");
-  checkbox.classList.add("checkbox");
+  const bullet = `<input type="checkbox" class="checkbox">
+  <input placeholder="New Task..." class="bullet-item">`;
+  container.innerHTML = bullet;
 
   //add event listeners
   container.addEventListener("keydown", (e) => {
@@ -395,22 +410,21 @@ function newListItem() {
   });
 
   //place the bullet in the list
-  container.append(checkbox, bulletText, closeBtn(container));
+  container.append(closeBtn(container));
   document.querySelector(".bullets-container").appendChild(container);
-
-  //const container = `<div class="bullet">${}</div>`;
 }
 
 //change the contents of an already saved list
 function editList(index) {
   newList(); //start by creating a blank new list window on screen
   const listData = userObj.lists[index]; //title and bullets in list to be edited
-  //create html elements
 
+  //create html elements
   const delBtn = `<button class="ui-btn-dark">Delete</button>`;
   const listBtns = document.getElementById("list-inner-btns");
   listBtns.insertAdjacentHTML("beforeend", delBtn);
 
+  //event listeners - delete list
   listBtns.childNodes[5].addEventListener("click", () => {
     //used to check if the user wants to permanently delete entire list
     errorMessage(
@@ -447,12 +461,13 @@ function editList(index) {
   let bullets = document.querySelectorAll(".bullet");
   let i = 1;
   for (let bullet of bullets) {
+    console.log(bullet.childNodes);
     if (isDone(listData[i])) {
       //task is saved as done
-      bullet.childNodes[1].value = removeDone(listData[i]);
+      bullet.childNodes[2].value = removeDone(listData[i]);
       bullet.childNodes[0].checked = true; //checkbox
     } else {
-      bullet.childNodes[1].value = listData[i]; //not done, just copy text data
+      bullet.childNodes[2].value = listData[i]; //not done, just copy text data
     }
     i++;
   }
@@ -479,7 +494,6 @@ function showLists(user) {
       .insertAdjacentHTML("beforeend", welcomeMessage);
   } else {
     //1 or more saved lists
-
     for (let i = 0; i < numLists; i++) {
       //create list icons for dashboard
       const iconHTML = `<div class="icon-container" index="${i}">
@@ -527,7 +541,6 @@ function showLists(user) {
 
         //task can be marked done from icon, without opening editList
         const thisCheckbox = thisIcon.querySelector(`[position="${j}"]`);
-
         thisCheckbox.addEventListener("click", () => {
           if (thisCheckbox.checked) {
             userObj.lists[i][j + 1] = "-DONE-" + userObj.lists[i][j + 1];
@@ -536,9 +549,6 @@ function showLists(user) {
           }
           localStorage.setItem(userObj.email, JSON.stringify(userObj)); //save changes to localStorage
         });
-
-        //add bullet
-        //document.getElementById(`list${i}`).insertAdjacentHTML(bul);
       }
     }
   }
@@ -548,8 +558,7 @@ pageHeader();
 const landing = document.getElementById("landing-container");
 var userObj;
 var numLists;
-//showWelcome();
-dashboard("cam.brown94@gmail.com", "password");
-//dashboard("newuser@todo.ca", "password");  //user with no lists
+showWelcome();
+//dashboard("cam.brown94@gmail.com", "password");
 
-//TODO disable buttons when error message active
+//TODO disable some buttons when there are other overlayed windows
