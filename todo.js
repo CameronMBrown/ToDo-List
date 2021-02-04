@@ -366,7 +366,7 @@ function newList() {
       }
     }
 
-    if (!match) {
+    if (!match && numLists > 0) {
       userObj.lists.push(thisList); //entirely new list
     }
 
