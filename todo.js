@@ -328,7 +328,7 @@ function newList() {
     }
   });
   document.getElementById("save").addEventListener("click", () => {
-    if (!!document.getElementById("err-container")) {
+    if (!document.getElementById("err-container")) {
       save();
     }
   });
